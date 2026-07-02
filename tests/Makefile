@@ -1,39 +1,23 @@
-all: strlen
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror
+LIBASM = ../libasm.a
+FUNCS = strlen strcpy strcmp write read strdup
 
-strlen:
-	gcc -Wall -Wextra -Werror -c test_strlen.c -o test_strlen.o
-	gcc test_strlen.o ../libasm.a -o test_strlen          
-	./test_strlen
+.PHONY: all clean fclean re $(FUNCS)
 
-strcpy:
-	gcc -Wall -Wextra -Werror -c test_strcpy.c -o test_strcpy.o
-	gcc test_strcpy.o ../libasm.a -o test_strcpy          
-	./test_strcpy
+all: $(FUNCS)
 
-strcmp:
-	gcc -Wall -Wextra -Werror -c test_strcmp.c -o test_strcmp.o
-	gcc test_strcmp.o ../libasm.a -o test_strcmp          
-	./test_strcmp
+$(FUNCS): %: test_%.o $(LIBASM)
+	$(CC) $< $(LIBASM) -o test_$@          
+	./test_$@
 
-write:
-	gcc -Wall -Wextra -Werror -c test_write.c -o test_write.o
-	gcc test_write.o ../libasm.a -o test_write          
-	./test_write
-
-read:
-	gcc -Wall -Wextra -Werror -c test_read.c -o test_read.o
-	gcc test_read.o ../libasm.a -o test_read          
-	./test_read
-
-strdup:
-	gcc -Wall -Wextra -Werror -c test_strdup.c -o test_strdup.o
-	gcc test_strdup.o ../libasm.a -o test_strdup          
-	./test_strdup
+test_%.o: test_%.clean
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf test_*.o
+	find . -maxdepth 1 -name 'test_*.o' -delete
 
 fclean: clean
 	find . -maxdepth 1 -name 'test_*' ! -name '*.c' -delete
 
-.PHONY: all strlen strcpy strcmp write read strdup clean fclean
+re: fclean all
