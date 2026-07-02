@@ -11,7 +11,7 @@ $(FUNCS): %: test_%.o $(LIBASM)
 	$(CC) $< $(LIBASM) -o test_$@          
 	./test_$@
 
-test_%.o: test_%.clean
+test_%.o: test_%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
