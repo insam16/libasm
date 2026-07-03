@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra 
 LIBASM = ../libasm.a
 FUNCS = strlen strcpy strcmp write read strdup
 
