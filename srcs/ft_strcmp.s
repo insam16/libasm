@@ -4,14 +4,15 @@ global ft_strcmp
 ft_strcmp:
 	xor r8, r8
 	.loop:
-		mov r9, [rdi+r8]
-		cmp r9, [rsi+r8]
+		movzx r9, byte [rdi+r8]
+		movzx r10, byte [rsi+r8]
+		cmp r9, r10
 		jne .calc
-		cmp byte r9, 0
+		test r9, r9
 		je .calc
 		inc r8
 		jmp .loop
 	.calc:
 		mov rax, r9
-		sub rax, [rsi+r8]
+		sub rax, r10
 	ret
