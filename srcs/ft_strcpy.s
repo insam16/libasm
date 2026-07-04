@@ -6,7 +6,7 @@ ft_strcpy:
 	.loop:
 		mov cl, [rsi+rax]
 		mov [rdi+rax], cl
-		cmp byte [rsi+rax], 0
+		test cl, cl
 		je .break
 		inc rax
 		jmp .loop
