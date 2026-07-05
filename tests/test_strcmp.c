@@ -45,6 +45,9 @@ int main(void)
 		printf("\n\n");
 	}
 
+	printf("=== ");
+	printf(fail ? "FAIL" : "OK");
+	printf(" ===\n");
 	return (fail);
 }
 
