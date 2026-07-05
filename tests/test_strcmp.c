@@ -13,8 +13,16 @@ int test_null_case(char *func_name, int (*func)(const char *, const char *), con
 
 int main(void)
 {
-	char *s1[] = {"", "a", "abc", "mat", "cat", "hello",		"moew", NULL, NULL};
-	char *s2[] = {"", "a", "abc", "map", "rat", "helloWorld",	NULL, "moew", NULL};
+	char *s1[] = {"", "a", "abc", "mat", "cat", "hello",
+					"\x80\x01", 
+					"What is Lorem Ipsum? Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised thanks to these sheets and more recently with desktop publishing software like Aldus PageMaker and Microsoft Word including versions of Lorem Ipsum.", 
+					"moew", NULL, NULL
+				};
+	char *s2[] = {"", "a", "abc", "map", "rat", "helloWorld",
+					"\x79\x01", 
+					"What is Lorem Ipsum? Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised thanks to these sheets and more recently with desktop publishing software like Aldus PageMaker and Microsoft Word including versions of Lorem Ipsum.", 
+					NULL, "moew", NULL
+				};
 	int i = 0;
 
 	int mine;
@@ -23,7 +31,7 @@ int main(void)
 	int ret_cmp;
 	int fail = 0;
 
-	for (; i < 6; ++i)
+	for (; i < 8; ++i)
 	{
 		printf("s1: %s, s2: %s\n", s1[i], s2[i]);
 		mine = test_cmp("ft_strcmp", ft_strcmp, s1[i], s2[i]);
@@ -34,7 +42,7 @@ int main(void)
 		printf("\n\n");
 	}
 
-	for (; i < 9; ++i)
+	for (; i < 11; ++i)
 	{
 		printf("s1: %s, s2: %s\n", s1[i], s2[i]);
 		mine = test_null_case("ft_strcmp", ft_strcmp, s1[i], s2[i]);
