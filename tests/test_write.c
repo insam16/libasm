@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <errno.h>
 
 extern ssize_t ft_write(int fd, const void *buf, size_t count);
 
@@ -23,6 +24,9 @@ int main(void)
 	int mine;
 	int libc;
 
+	int errno_mine;
+	int errno_libc;
+
 	int ret_cmp;
 	int fail = 0;
 
@@ -33,8 +37,14 @@ int main(void)
 		{
 			printf("str: %s\n", str[i]);
 			mine = test_write("ft_write", ft_write, fd, str[i]);
+			errno_mine = errno;
 			libc = test_write("   write",    write, fd, str[i]);
+			errno_libc = errno;
 			ret_cmp = mine == libc;
+			printf(ret_cmp ? "OK" : "FAIL");
+			if (!ret_cmp) fail = 1;
+			printf("\nerrno: %d %d: ", errno_mine, errno_libc);
+			ret_cmp = errno_mine == errno_libc;
 			printf(ret_cmp ? "OK" : "FAIL");
 			if (!ret_cmp) fail = 1;
 			printf("\n\n");
@@ -44,8 +54,14 @@ int main(void)
 		{
 			printf("str: %s\n", str[i]);
 			mine = test_null_case("ft_write", ft_write, fd, str[i]);
+			errno_mine = errno;
 			libc = test_null_case("   write",    write, fd, str[i]);
+			errno_libc = errno;
 			ret_cmp = mine == libc;
+			printf(ret_cmp ? "OK" : "FAIL");
+			if (!ret_cmp) fail = 1;
+			printf("\nerrno: %d %d: ", errno_mine, errno_libc);
+			ret_cmp = errno_mine == errno_libc;
 			printf(ret_cmp ? "OK" : "FAIL");
 			if (!ret_cmp) fail = 1;
 			printf("\n\n");

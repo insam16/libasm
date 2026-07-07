@@ -1,5 +1,6 @@
 section .text
 global ft_write
+extern __errno_location
 
 ft_write:
     mov rax, 1
@@ -9,8 +10,13 @@ ft_write:
     jl .err
     .end:
     ret
-    .err:
-    ; errno = -rax
-    ; rax = -1
+
+.err:
+    neg rax
+    push rax
+    call __errno_location wrt ..plt
+    pop qword [rax]
+    mov rax, -1
     jmp .end
-    
+
+section .note.GNU-stack noalloc noexec
