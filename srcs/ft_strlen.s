@@ -10,3 +10,5 @@ ft_strlen:
 		jmp .loop
 	.break:
 	ret
+
+section .note.GNU-stack noalloc noexec

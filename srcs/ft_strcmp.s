@@ -16,3 +16,5 @@ ft_strcmp:
 		mov rax, r9
 		sub rax, r10
 	ret
+
+section .note.GNU-stack noalloc noexec

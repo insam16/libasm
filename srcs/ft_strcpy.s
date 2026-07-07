@@ -13,3 +13,5 @@ ft_strcpy:
 	.break:
 	mov rax, rdi
 	ret
+
+section .note.GNU-stack noalloc noexec
