@@ -9,8 +9,8 @@
 
 extern ssize_t ft_write(int fd, const void *buf, size_t count);
 
-int test_write(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, const char *str);
-int test_null_case(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, const char *str);
+int test_write(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, const char *str, int *errno_ptr);
+int test_null_case(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, int *errno_ptr);
 
 int main(void)
 {
@@ -36,9 +36,9 @@ int main(void)
 		for (; i < 9; ++i)
 		{
 			printf("str: %s\n", str[i]);
-			mine = test_write("ft_write", ft_write, fd, str[i]);
+			mine = test_write("ft_write", ft_write, fd, str[i], &errno_mine);
 			errno_mine = errno;
-			libc = test_write("   write",    write, fd, str[i]);
+			libc = test_write("   write",    write, fd, str[i], &errno_libc);
 			errno_libc = errno;
 			ret_cmp = mine == libc;
 			printf(ret_cmp ? "OK" : "FAIL");
@@ -53,10 +53,8 @@ int main(void)
 		for (; i < 10; ++i)
 		{
 			printf("str: %s\n", str[i]);
-			mine = test_null_case("ft_write", ft_write, fd, str[i]);
-			errno_mine = errno;
-			libc = test_null_case("   write",    write, fd, str[i]);
-			errno_libc = errno;
+			mine = test_null_case("ft_write", ft_write, fd, &errno_mine);
+			libc = test_null_case("   write",    write, fd, &errno_libc);
 			ret_cmp = mine == libc;
 			printf(ret_cmp ? "OK" : "FAIL");
 			if (!ret_cmp) fail = 1;
@@ -75,31 +73,54 @@ int main(void)
 	return (fail);
 }
 
-int test_write(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, const char *str)
+int test_write(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, const char *str, int *errno_ptr)
 {
 	int ret;
 
-	ret = func(fd, str, strlen(str));
-	printf(": %s(%d, %s, %lu) -> %d\n", func_name, fd, str, (unsigned long)strlen(str), ret);
+	if (str == NULL)
+		ret = func(fd, str, 5);
+	else
+		ret = func(fd, str, strlen(str));
+	*errno_ptr = errno;
+	if (str == NULL)
+		printf(": %s(%d, %s, %lu) -> %d\n", func_name, fd, str, (unsigned long)5, ret);
+	else
+		printf(": %s(%d, %s, %lu) -> %d\n", func_name, fd, str, (unsigned long)strlen(str), ret);
 
 	return (ret);
 }
 
-int test_null_case(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, const char *str)
+int test_null_case(char *func_name, ssize_t (*func)(int, const void *, size_t), int fd, int *errno_ptr)
 {
+	int pipe_fd[2];
+	pipe(pipe_fd);
+	
 	pid_t pid = fork();
-
+	
 	if (pid == 0) {
-		test_write(func_name, func, fd, str);
+		close(pipe_fd[0]);
+		int ret = test_write(func_name, func, fd, NULL, errno_ptr);
+		int payload[2] = {ret, *errno_ptr};
+		write(pipe_fd[1], payload, sizeof(payload));
+		close(pipe_fd[1]);
 		_exit(0);
 	} else {
+		close(pipe_fd[1]);
 		int status;
 		waitpid(pid, &status, 0);
+	
 		if (WIFSIGNALED(status)) {
-			printf("%s: 시그널 %d로 종료됨 (예상: SIGSEGV==%d, 일치:%d)\n",
-				func_name, WTERMSIG(status), SIGSEGV, WTERMSIG(status) == SIGSEGV);
-			return 1; // 세그폴트
+			printf("%s: 시그널 %d로 종료됨 (예상: SIGPIPE==%d, 일치:%d)\n",
+				func_name, WTERMSIG(status), SIGPIPE, WTERMSIG(status) == SIGPIPE);
+			close(pipe_fd[0]);
+			return 1;
 		}
+		int payload[2] = {0, 0};
+		read(pipe_fd[0], payload, sizeof(payload));
+		close(pipe_fd[0]);
+		*errno_ptr = payload[1];
+		printf("%s: 정상 종료됨, ret=%d, errno=%d\n",
+			func_name, payload[0], payload[1]);
 		return 0;
 	}
 }
