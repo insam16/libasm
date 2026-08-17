@@ -37,9 +37,7 @@ int main(void)
 		{
 			printf("str: %s\n", str[i]);
 			mine = test_write("ft_write", ft_write, fd, str[i], &errno_mine);
-			errno_mine = errno;
 			libc = test_write("   write",    write, fd, str[i], &errno_libc);
-			errno_libc = errno;
 			ret_cmp = mine == libc;
 			printf(ret_cmp ? "OK" : "FAIL");
 			if (!ret_cmp) fail = 1;
